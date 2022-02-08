@@ -1714,7 +1714,7 @@ SpatialMaterial::TextureChannel SpatialMaterial::get_refraction_texture_channel(
 	return refraction_texture_channel;
 }
 
-RID SpatialMaterial::get_material_rid_for_2d(bool p_shaded, bool p_transparent, bool p_double_sided, bool p_cut_alpha, bool p_opaque_prepass, bool p_billboard, bool p_billboard_y) {
+RID SpatialMaterial::get_material_rid_for_2d(bool p_shaded, bool p_transparent, bool p_normal_mapping, bool p_double_sided, bool p_cut_alpha, bool p_opaque_prepass, bool p_billboard, bool p_billboard_y) {
 	int version = 0;
 	if (p_shaded) {
 		version = 1;
@@ -1747,6 +1747,7 @@ RID SpatialMaterial::get_material_rid_for_2d(bool p_shaded, bool p_transparent, 
 
 	material->set_flag(FLAG_UNSHADED, !p_shaded);
 	material->set_feature(FEATURE_TRANSPARENT, p_transparent);
+	material->set_feature(FEATURE_NORMAL_MAPPING, p_normal_mapping);
 	material->set_cull_mode(p_double_sided ? CULL_DISABLED : CULL_BACK);
 	material->set_depth_draw_mode(p_opaque_prepass ? DEPTH_DRAW_ALPHA_OPAQUE_PREPASS : DEPTH_DRAW_OPAQUE_ONLY);
 	material->set_flag(FLAG_SRGB_VERTEX_COLOR, true);

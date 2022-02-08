@@ -29,6 +29,9 @@
 		<member name="texture" type="Texture" setter="set_texture" getter="get_texture">
 			[Texture] object to draw. If [member GeometryInstance.material_override] is used, this will be overridden.
 		</member>
+		<member name="normal_map" type="Texture" setter="set_normal_map" getter="get_normal_map">
+			[Texture] object to be used as the normal map. If [member GeometryInstance.material_override] is used, this will be overridden.
+		</member>
 		<member name="vframes" type="int" setter="set_vframes" getter="get_vframes" default="1">
 			The number of rows in the sprite sheet.
 		</member>

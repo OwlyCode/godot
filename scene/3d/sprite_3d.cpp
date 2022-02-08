@@ -577,9 +577,13 @@ void Sprite3D::_draw() {
 	VS::get_singleton()->mesh_set_custom_aabb(mesh, aabb);
 	set_aabb(aabb);
 
-	RID mat = SpatialMaterial::get_material_rid_for_2d(get_draw_flag(FLAG_SHADED), get_draw_flag(FLAG_TRANSPARENT), get_draw_flag(FLAG_DOUBLE_SIDED), get_alpha_cut_mode() == ALPHA_CUT_DISCARD, get_alpha_cut_mode() == ALPHA_CUT_OPAQUE_PREPASS, get_billboard_mode() == SpatialMaterial::BILLBOARD_ENABLED, get_billboard_mode() == SpatialMaterial::BILLBOARD_FIXED_Y);
+	RID mat = SpatialMaterial::get_material_rid_for_2d(get_draw_flag(FLAG_SHADED), get_draw_flag(FLAG_TRANSPARENT), true, get_draw_flag(FLAG_DOUBLE_SIDED), get_alpha_cut_mode() == ALPHA_CUT_DISCARD, get_alpha_cut_mode() == ALPHA_CUT_OPAQUE_PREPASS, get_billboard_mode() == SpatialMaterial::BILLBOARD_ENABLED, get_billboard_mode() == SpatialMaterial::BILLBOARD_FIXED_Y);
 	VS::get_singleton()->material_set_shader(get_material(), VS::get_singleton()->material_get_shader(mat));
 	VS::get_singleton()->material_set_param(get_material(), "texture_albedo", texture->get_rid());
+	if (normal_map.is_valid()) {
+		VS::get_singleton()->material_set_param(get_material(), "normal_scale", 1);
+		VS::get_singleton()->material_set_param(get_material(), "texture_normal", normal_map->get_rid());
+	}
 	VS::get_singleton()->instance_set_surface_material(get_instance(), 0, get_material());
 }
 
@@ -600,6 +604,25 @@ void Sprite3D::set_texture(const Ref<Texture> &p_texture) {
 
 Ref<Texture> Sprite3D::get_texture() const {
 	return texture;
+}
+
+void Sprite3D::set_normal_map(const Ref<Texture> &p_texture) {
+	if (p_texture == normal_map) {
+		return;
+	}
+	if (normal_map.is_valid()) {
+		normal_map->disconnect(CoreStringNames::get_singleton()->changed, this, SceneStringNames::get_singleton()->_queue_update);
+	}
+	normal_map = p_texture;
+	if (normal_map.is_valid()) {
+		texture->set_flags(texture->get_flags()); //remove repeat from texture, it looks bad in sprites
+		normal_map->connect(CoreStringNames::get_singleton()->changed, this, SceneStringNames::get_singleton()->_queue_update);
+	}
+	_queue_update();
+}
+
+Ref<Texture> Sprite3D::get_normal_map() const {
+	return normal_map;
 }
 
 void Sprite3D::set_region(bool p_region) {
@@ -719,6 +742,8 @@ void Sprite3D::_validate_property(PropertyInfo &property) const {
 void Sprite3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_texture", "texture"), &Sprite3D::set_texture);
 	ClassDB::bind_method(D_METHOD("get_texture"), &Sprite3D::get_texture);
+	ClassDB::bind_method(D_METHOD("set_normal_map", "texture"), &Sprite3D::set_normal_map);
+	ClassDB::bind_method(D_METHOD("get_normal_map"), &Sprite3D::get_normal_map);
 
 	ClassDB::bind_method(D_METHOD("set_region", "enabled"), &Sprite3D::set_region);
 	ClassDB::bind_method(D_METHOD("is_region"), &Sprite3D::is_region);
@@ -739,6 +764,7 @@ void Sprite3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_hframes"), &Sprite3D::get_hframes);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_texture", "get_texture");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "normal_map", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_normal_map", "get_normal_map");
 	ADD_GROUP("Animation", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "hframes", PROPERTY_HINT_RANGE, "1,16384,1"), "set_hframes", "get_hframes");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "vframes", PROPERTY_HINT_RANGE, "1,16384,1"), "set_vframes", "get_vframes");
@@ -920,7 +946,7 @@ void AnimatedSprite3D::_draw() {
 	VS::get_singleton()->mesh_set_custom_aabb(mesh, aabb);
 	set_aabb(aabb);
 
-	RID mat = SpatialMaterial::get_material_rid_for_2d(get_draw_flag(FLAG_SHADED), get_draw_flag(FLAG_TRANSPARENT), get_draw_flag(FLAG_DOUBLE_SIDED), get_alpha_cut_mode() == ALPHA_CUT_DISCARD, get_alpha_cut_mode() == ALPHA_CUT_OPAQUE_PREPASS, get_billboard_mode() == SpatialMaterial::BILLBOARD_ENABLED, get_billboard_mode() == SpatialMaterial::BILLBOARD_FIXED_Y);
+	RID mat = SpatialMaterial::get_material_rid_for_2d(get_draw_flag(FLAG_SHADED), get_draw_flag(FLAG_TRANSPARENT), false, get_draw_flag(FLAG_DOUBLE_SIDED), get_alpha_cut_mode() == ALPHA_CUT_DISCARD, get_alpha_cut_mode() == ALPHA_CUT_OPAQUE_PREPASS, get_billboard_mode() == SpatialMaterial::BILLBOARD_ENABLED, get_billboard_mode() == SpatialMaterial::BILLBOARD_FIXED_Y);
 	VS::get_singleton()->material_set_shader(get_material(), VS::get_singleton()->material_get_shader(mat));
 	VS::get_singleton()->material_set_param(get_material(), "texture_albedo", texture->get_rid());
 	VS::get_singleton()->instance_set_surface_material(get_instance(), 0, get_material());

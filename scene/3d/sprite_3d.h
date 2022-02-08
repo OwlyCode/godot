@@ -148,6 +148,7 @@ public:
 class Sprite3D : public SpriteBase3D {
 	GDCLASS(Sprite3D, SpriteBase3D);
 	Ref<Texture> texture;
+	Ref<Texture> normal_map;
 
 	bool region;
 	Rect2 region_rect;
@@ -166,6 +167,9 @@ protected:
 public:
 	void set_texture(const Ref<Texture> &p_texture);
 	Ref<Texture> get_texture() const;
+
+	void set_normal_map(const Ref<Texture> &p_texture);
+	Ref<Texture> get_normal_map() const;
 
 	void set_region(bool p_region);
 	bool is_region() const;
